@@ -6,7 +6,9 @@ TwistedTwitterStream
 
 About
 =====
-The ``TwistedTwitterStream`` package provides an event-driven API for receiving `Twitter <http://twitter.com>`_ status updates through the asynchronous `Twitter Streaming API <http://apiwiki.twitter.com/Streaming-API-Documentation>`_, and supports the following methods:
+The ``TwistedTwitterStream`` package provides an event-driven API for receiving `Twitter <http://twitter.com>`_ status updates through the asynchronous `Twitter Streaming API <http://apiwiki.twitter.com/Streaming-API-Documentation>`_.
+
+The following methods are supported:
  - `firehose <http://apiwiki.twitter.com/Streaming-API-Documentation#statuses/firehose>`_
  - `retweet <http://apiwiki.twitter.com/Streaming-API-Documentation#statuses/retweet>`_
  - `sample <http://apiwiki.twitter.com/Streaming-API-Documentation#statuses/sample>`_
@@ -19,6 +21,7 @@ Notes
  - All methods must be initialized with a *consumer* function, which will be fired on every status update.
  - In order to stop the stream and disconnect from the server, the *consumer* function must return *False*.
  - The *consumer* function will always receive statuses in the JSON format.
+ - No proxy support.
 
 Examples
 ========
