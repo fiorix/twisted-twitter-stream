@@ -1,7 +1,7 @@
 ====================
 TwistedTwitterStream
 ====================
-:Info: See `Twitter Streaming API <http://apiwiki.twitter.com/Streaming-API-Documentation>`_ for more information. See `github` for the latest source.
+:Info: See `Twitter Streaming API <http://apiwiki.twitter.com/Streaming-API-Documentation>`_ for more information. See `github <http://github.com/fiorix/twisted-twitter-stream/>`_ for the latest source.
 :Author: Alexandre Fiori <fiorix@gmail.com>
 
 About
