@@ -15,7 +15,7 @@
 # under the License.
 
 __author__ = "Alexandre Fiori"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 """Twisted client library for the Twitter Streaming API:
 http://apiwiki.twitter.com/Streaming-API-Documentation"""
@@ -36,6 +36,7 @@ except ImportError:
 
 class _TwitterStreamProtocol(basic.LineReceiver):
     delimiter = "\r\n"
+
     def __init__(self):
         self.in_header = True
         self.header_data = []
@@ -53,15 +54,15 @@ class _TwitterStreamProtocol(basic.LineReceiver):
                 http, status, message = self.header_data[0].split(" ", 2)
                 status = int(status)
                 if status == 200:
-                    if getattr(self.factory, "deferred"):
+                    if self.factory.deferred:
                         self.factory.deferred.callback(status)
                 else:
                     self.factory.continueTrying = 0
                     self.transport.loseConnection()
-                    if getattr(self.factory, "deferred"):
+                    if self.factory.deferred:
                         self.factory.deferred.errback(RuntimeError(status, message))
 
-                del self.factory.deferred
+                self.factory.deferred = None
                 self.in_header = False
             break
         else:
@@ -97,6 +98,7 @@ class _TwitterStreamProtocol(basic.LineReceiver):
 
 
 class _TwitterStreamFactory(protocol.ReconnectingClientFactory):
+    maxDelay = 120
     protocol = _TwitterStreamProtocol
 
     def __init__(self, consumer):
