@@ -4,19 +4,21 @@
 import TwistedTwitterStream
 from twisted.internet import reactor
 
-def consumer(status):
-    print status
+class consumer(TwistedTwitterStream.Consumer):
+    def connectionMade(self):
+        print "connected..."
 
-def success(status):
-    print "ready!"
+    def connectionFailed(self, why):
+        print "cannot connect:", why
+        reactor.stop()
 
-def failure(why):
-    status, message = why.getErrorMessage()
-    print "HTTP error %d: %s" % (status, message)
-    reactor.stop()
+    def tweetReceived(self, tweet):
+        print "new tweet:", repr(tweet)
+        
+        # you may call self.disconnect() anytime to
+        # permanently disconnect from the Twitter Stream
 
 if __name__ == "__main__":
-    d = TwistedTwitterStream.filter("username", "password", consumer,
+    TwistedTwitterStream.filter("username", "password", consumer(),
             track=["football", "soccer", "world cup", "palmeiras"])
-    d.addCallbacks(success, failure)
     reactor.run()

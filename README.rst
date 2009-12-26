@@ -18,9 +18,7 @@ Notes
 =====
  - A JSON parser is required. Like `json <http://docs.python.org/library/json.html>`_ or `simplejson <http://pypi.python.org/pypi/simplejson/>`_.
  - All methods will automatically reconnect to the server with an exponential back-off. See `t.i.p.ReconnectingClientFactory <http://twistedmatrix.com/documents/8.2.0/api/twisted.internet.protocol.ReconnectingClientFactory.html>`_ for details.
- - All methods must be initialized with a *consumer* function, which will be fired on every status update.
- - In order to stop the stream and disconnect from the server, the *consumer* function must return *False*.
- - The *consumer* function will always receive statuses in the JSON format.
+ - All methods must be initialized with a *consumer* object, inherited from `TwistedTwitterStream.Consumer`
  - No proxy support.
 
 Examples

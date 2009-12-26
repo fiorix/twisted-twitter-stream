@@ -34,6 +34,27 @@ except ImportError:
                            "http://pypi.python.org/pypi/simplejson/")
 
 
+class Consumer(object):
+    def connectionMade(self):
+        pass
+
+    def connectionFailed(self, why):
+        pass
+
+    def tweetReceived(self, tweet):
+        raise NotImplementedError
+
+    def _registerProtocol(self, protocol):
+        self._streamProtocol = protocol
+
+    def disconnect(self):
+        if hasattr(self, "_streamProtocol"):
+            self._streamProtocol.factory.continueTrying = 0
+            self._streamProtocol.transport.loseConnection()
+        else:
+            raise RuntimeError("not connected")
+
+
 class _TwitterStreamProtocol(basic.LineReceiver):
     delimiter = "\r\n"
 
@@ -45,6 +66,7 @@ class _TwitterStreamProtocol(basic.LineReceiver):
 
     def connectionMade(self):
         self.transport.write(self.factory.header)
+        self.factory.consumer._registerProtocol(self)
 
     def lineReceived(self, line):
         while self.in_header:
@@ -54,15 +76,12 @@ class _TwitterStreamProtocol(basic.LineReceiver):
                 http, status, message = self.header_data[0].split(" ", 2)
                 status = int(status)
                 if status == 200:
-                    if self.factory.deferred:
-                        self.factory.deferred.callback(status)
+                    self.factory.consumer.connectionMade()
                 else:
                     self.factory.continueTrying = 0
                     self.transport.loseConnection()
-                    if self.factory.deferred:
-                        self.factory.deferred.errback(RuntimeError(status, message))
+                    self.factory.consumer.connectionFailed(RuntimeError(status, message))
 
-                self.factory.deferred = None
                 self.in_header = False
             break
         else:
@@ -81,17 +100,13 @@ class _TwitterStreamProtocol(basic.LineReceiver):
 
         self.status_data += data
         if self.status_size == 0:
-            if callable(self.factory.consumer):
-                try:
-                    # ignore newline keep-alive
-                    status = _json.loads(self.status_data)
-                except:
-                    pass
-                else:
-                    rv = self.factory.consumer(status)
-                    if rv is False:
-                        self.factory.continueTrying = 0
-                        self.transport.loseConnection()
+            try:
+                # ignore newline keep-alive
+                tweet = _json.loads(self.status_data)
+            except:
+                pass
+            else:
+                self.factory.consumer.tweetReceived(tweet)
             self.status_data = ""
             self.status_size = None
             self.setLineMode(extra)
@@ -102,8 +117,10 @@ class _TwitterStreamFactory(protocol.ReconnectingClientFactory):
     protocol = _TwitterStreamProtocol
 
     def __init__(self, consumer):
-        self.consumer = consumer
-        self.deferred = defer.Deferred()
+        if isinstance(consumer, Consumer):
+            self.consumer = consumer
+        else:
+            raise TypeError("consumer should be an instance of TwistedTwitterStream.Consumer")
 
     def make_header(self, username, password, method, uri, postdata=""):
         auth = base64.encodestring("%s:%s" % (username, password)).strip()
@@ -129,19 +146,16 @@ def firehose(username, password, consumer):
     tw = _TwitterStreamFactory(consumer)
     tw.make_header(username, password, "GET", "/1/statuses/firehose.json")
     reactor.connectTCP("stream.twitter.com", 80, tw)
-    return tw.deferred
 
 def retweet(username, password, consumer):
     tw = _TwitterStreamFactory(consumer)
     tw.make_header(username, password, "GET", "/1/statuses/retweet.json")
     reactor.connectTCP("stream.twitter.com", 80, tw)
-    return tw.deferred
 
 def sample(username, password, consumer):
     tw = _TwitterStreamFactory(consumer)
     tw.make_header(username, password, "GET", "/1/statuses/sample.json")
     reactor.connectTCP("stream.twitter.com", 80, tw)
-    return tw.deferred
 
 def filter(username, password, consumer, count=0, delimited=0, track=[], follow=[]):
     qs = []
@@ -160,4 +174,3 @@ def filter(username, password, consumer, count=0, delimited=0, track=[], follow=
     tw = _TwitterStreamFactory(consumer)
     tw.make_header(username, password, "POST", "/1/statuses/filter.json", "&".join(qs))
     reactor.connectTCP("stream.twitter.com", 80, tw)
-    return tw.deferred
