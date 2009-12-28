@@ -34,7 +34,7 @@ except ImportError:
                            "http://pypi.python.org/pypi/simplejson/")
 
 
-class Consumer(object):
+class TweetReceiver(object):
     def connectionMade(self):
         pass
 

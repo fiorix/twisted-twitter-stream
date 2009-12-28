@@ -13,7 +13,7 @@
 import TwistedTwitterStream
 from twisted.internet import reactor
 
-class consumer(TwistedTwitterStream.Consumer):
+class consumer(TwistedTwitterStream.TweetReceiver):
     def connectionMade(self):
         print "connected..."
 
