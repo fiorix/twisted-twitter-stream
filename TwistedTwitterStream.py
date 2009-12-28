@@ -117,10 +117,10 @@ class _TwitterStreamFactory(protocol.ReconnectingClientFactory):
     protocol = _TwitterStreamProtocol
 
     def __init__(self, consumer):
-        if isinstance(consumer, Consumer):
+        if isinstance(consumer, TweetReceiver):
             self.consumer = consumer
         else:
-            raise TypeError("consumer should be an instance of TwistedTwitterStream.Consumer")
+            raise TypeError("consumer should be an instance of TwistedTwitterStream.TweetReceiver")
 
     def make_header(self, username, password, method, uri, postdata=""):
         auth = base64.encodestring("%s:%s" % (username, password)).strip()
