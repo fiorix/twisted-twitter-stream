@@ -24,3 +24,15 @@ Notes
 Examples
 ========
 Examples are available in the *examples/* directory.
+
+Credits
+=======
+Thanks to (in no particular order):
+
+- Arnaldo Moraes
+  
+  - Testing, patching and using for private projects
+
+- Vanderson Mota
+
+  - Patching setup.py and PyPi maintenance
