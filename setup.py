@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name="TwistedTwitterStream",
@@ -10,4 +10,5 @@ setup(
     author="Alexandre Fiori",
     url="http://github.com/fiorix/twisted-twitter-stream",
     py_modules=["TwistedTwitterStream"],
+    #install_requires=["twisted"],
 )
